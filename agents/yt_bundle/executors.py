@@ -1,0 +1,197 @@
+"""
+YouTube Agent Roma - Executors Module
+Contains the main execution logic for the YouTube agent
+"""
+
+import os
+import sys
+from pathlib import Path
+from typing import Dict, Any, Optional
+import yaml
+import click
+from loguru import logger
+
+# Add project root to path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+
+class YouTubeAgentExecutor:
+    """Main executor class for YouTube agent operations"""
+    
+    def __init__(self, config_path: Optional[str] = None):
+        """Initialize the executor with configuration"""
+        self.config_path = config_path or str(project_root / "nodes.yaml")
+        self.config = self._load_config()
+        self._setup_logging()
+    
+    def _load_config(self) -> Dict[str, Any]:
+        """Load configuration from YAML file"""
+        try:
+            with open(self.config_path, 'r') as f:
+                config = yaml.safe_load(f)
+                logger.info(f"Loaded configuration from {self.config_path}")
+                return config or {}
+        except FileNotFoundError:
+            logger.warning(f"Configuration file {self.config_path} not found, using defaults")
+            return {}
+        except yaml.YAMLError as e:
+            logger.error(f"Error parsing configuration file: {e}")
+            return {}
+    
+    def _setup_logging(self):
+        """Setup logging configuration"""
+        log_level = self.config.get('logging', {}).get('level', 'INFO')
+        logger.remove()  # Remove default handler
+        logger.add(
+            sys.stderr,
+            level=log_level,
+            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+        )
+    
+    def execute(self, operation: str, **kwargs) -> Dict[str, Any]:
+        """Execute a specific operation"""
+        logger.info(f"Executing operation: {operation}")
+        
+        try:
+            if operation == "search":
+                return self._execute_search(**kwargs)
+            elif operation == "analyze":
+                return self._execute_analyze(**kwargs)
+            elif operation == "process":
+                return self._execute_process(**kwargs)
+            else:
+                raise ValueError(f"Unknown operation: {operation}")
+        except Exception as e:
+            logger.error(f"Error executing operation {operation}: {e}")
+            return {"error": str(e), "success": False}
+    
+    def _execute_search(self, **kwargs) -> Dict[str, Any]:
+        """Execute search operation"""
+        query = kwargs.get('query', '')
+        logger.info(f"Searching for: {query}")
+        
+        try:
+            # Import YouTube API functionality
+            import os
+            import requests
+            from dotenv import load_dotenv
+            
+            # Load environment variables
+            load_dotenv()
+            api_key = os.getenv("YOUTUBE_API_KEY")
+            
+            if not api_key:
+                return {
+                    "success": False,
+                    "operation": "search",
+                    "query": query,
+                    "error": "YouTube API key not found in environment variables"
+                }
+            
+            # Search YouTube
+            url = "https://www.googleapis.com/youtube/v3/search"
+            params = {
+                "part": "snippet",
+                "q": query,
+                "maxResults": 10,
+                "type": "video",
+                "key": api_key
+            }
+            
+            response = requests.get(url, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                videos = []
+                for item in data.get("items", []):
+                    video = {
+                        "title": item["snippet"]["title"],
+                        "channel": item["snippet"]["channelTitle"],
+                        "video_id": item["id"]["videoId"],
+                        "url": f"https://www.youtube.com/watch?v={item['id']['videoId']}",
+                        "description": item["snippet"]["description"][:200] + "..." if len(item["snippet"]["description"]) > 200 else item["snippet"]["description"],
+                        "published_at": item["snippet"]["publishedAt"]
+                    }
+                    videos.append(video)
+                
+                return {
+                    "success": True,
+                    "operation": "search",
+                    "query": query,
+                    "results": videos,
+                    "total_results": data.get("pageInfo", {}).get("totalResults", 0)
+                }
+            else:
+                return {
+                    "success": False,
+                    "operation": "search",
+                    "query": query,
+                    "error": f"YouTube API error: {response.status_code} - {response.text}"
+                }
+                
+        except Exception as e:
+            logger.error(f"Error in YouTube search: {e}")
+            return {
+                "success": False,
+                "operation": "search",
+                "query": query,
+                "error": str(e)
+            }
+    
+    def _execute_analyze(self, **kwargs) -> Dict[str, Any]:
+        """Execute analysis operation"""
+        data = kwargs.get('data', {})
+        logger.info("Analyzing data")
+        
+        # Placeholder for analysis logic
+        return {
+            "success": True,
+            "operation": "analyze",
+            "analysis": {}
+        }
+    
+    def _execute_process(self, **kwargs) -> Dict[str, Any]:
+        """Execute processing operation"""
+        input_data = kwargs.get('input_data', {})
+        logger.info("Processing data")
+        
+        # Placeholder for processing logic
+        return {
+            "success": True,
+            "operation": "process",
+            "output": {}
+        }
+
+
+@click.command()
+@click.option('--operation', default='search', help='Operation to execute')
+@click.option('--query', help='Search query')
+@click.option('--config', help='Path to configuration file')
+def main(operation: str, query: str = None, config: str = None):
+    """Main entry point for the YouTube agent executor"""
+    try:
+        executor = YouTubeAgentExecutor(config)
+        
+        kwargs = {}
+        if query:
+            kwargs['query'] = query
+        
+        result = executor.execute(operation, **kwargs)
+        
+        if result.get('success'):
+            logger.info("Operation completed successfully")
+            print(f"Result: {result}")
+        else:
+            logger.error("Operation failed")
+            print(f"Error: {result.get('error', 'Unknown error')}")
+            sys.exit(1)
+            
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
+

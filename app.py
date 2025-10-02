@@ -6,7 +6,7 @@ YouTube Agent Roma - Web API Application
 import sys
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel
 
 # Add current directory to Python path
@@ -19,6 +19,7 @@ try:
     from fastapi.staticfiles import StaticFiles
     from fastapi.responses import FileResponse
     from agents.yt_bundle.executors import YouTubeAgentExecutor
+    from crypto_dashboard import crypto_dashboard
 except ImportError as e:
     print(f"Error importing required modules: {e}")
     print("Please ensure all dependencies are installed: pip install -r requirements.txt")
@@ -35,6 +36,19 @@ class AnalysisRequest(BaseModel):
 
 class ProcessRequest(BaseModel):
     input_data: Dict[str, Any]
+
+class CryptoPriceRequest(BaseModel):
+    symbols: Optional[List[str]] = ["BTCUSDT", "ETHUSDT", "ADAUSDT", "SOLUSDT", "BNBUSDT"]
+    market_type: Optional[str] = "spot"
+
+class CryptoFeedRequest(BaseModel):
+    category: Optional[str] = "trending"  # trending, gainers, losers, volume
+    limit: Optional[int] = 20
+
+class CryptoAnalysisRequest(BaseModel):
+    symbol: str
+    timeframe: Optional[str] = "24h"
+    analysis_type: Optional[str] = "technical"
 
 class Response(BaseModel):
     success: bool
@@ -120,6 +134,67 @@ async def process_content(request: ProcessRequest):
             success=result.get("success", False),
             message="Processing completed successfully" if result.get("success") else "Processing failed",
             data=result
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Crypto Feed Endpoints
+@app.get("/crypto")
+async def crypto_dashboard():
+    """Serve the crypto dashboard page"""
+    return FileResponse("static/crypto_dashboard.html")
+
+@app.post("/crypto/prices", response_model=Response)
+async def get_crypto_prices(request: CryptoPriceRequest):
+    """Get real-time crypto prices"""
+    try:
+        result = await crypto_dashboard.get_crypto_prices(
+            symbols=request.symbols,
+            market_type=request.market_type
+        )
+        
+        return Response(
+            success=result["success"],
+            message="Prices fetched successfully" if result["success"] else "Failed to fetch prices",
+            data=result,
+            error=result.get("error")
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/crypto/feed", response_model=Response)
+async def get_crypto_feed(request: CryptoFeedRequest):
+    """Get crypto market feed"""
+    try:
+        result = await crypto_dashboard.get_crypto_feed(
+            category=request.category,
+            limit=request.limit
+        )
+        
+        return Response(
+            success=result["success"],
+            message="Feed fetched successfully" if result["success"] else "Failed to fetch feed",
+            data=result,
+            error=result.get("error")
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/crypto/analysis", response_model=Response)
+async def get_crypto_analysis(request: CryptoAnalysisRequest):
+    """Get detailed crypto analysis with YouTube topic suggestions"""
+    try:
+        result = await crypto_dashboard.get_crypto_analysis(
+            symbol=request.symbol,
+            timeframe=request.timeframe,
+            analysis_type=request.analysis_type
+        )
+        
+        return Response(
+            success=result["success"],
+            message="Analysis completed successfully" if result["success"] else "Failed to complete analysis",
+            data=result,
+            error=result.get("error")
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

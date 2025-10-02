@@ -1,0 +1,53 @@
+<svg width="1200" height="500" viewBox="0 0 1200 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1f2a44"/>
+      <stop offset="1" stop-color="#221631"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#667eea"/>
+      <stop offset="0.5" stop-color="#764ba2"/>
+      <stop offset="1" stop-color="#f093fb"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 120) rotate(45) scale(220 220)">
+      <stop stop-color="#f093fb" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#f093fb" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="500" fill="url(#bg)"/>
+  <!-- floating orb -->
+  <circle cx="900" cy="120" r="140" fill="url(#orb)"/>
+  <!-- grid -->
+  <g opacity="0.25">
+    <g stroke="#8aa1ff" stroke-opacity="0.25">
+      <!-- vertical lines -->
+      <path d="M100 0 V500 M200 0 V500 M300 0 V500 M400 0 V500 M500 0 V500 M600 0 V500 M700 0 V500 M800 0 V500 M900 0 V500 M1000 0 V500"/>
+      <!-- horizontal lines -->
+      <path d="M0 100 H1200 M0 200 H1200 M0 300 H1200 M0 400 H1200"/>
+    </g>
+    <!-- nodes -->
+    <g fill="#8aa1ff">
+      <circle cx="400" cy="300" r="3"/>
+      <circle cx="520" cy="260" r="3"/>
+      <circle cx="640" cy="320" r="3"/>
+      <circle cx="760" cy="240" r="3"/>
+      <circle cx="880" cy="280" r="3"/>
+    </g>
+    <!-- connecting path -->
+    <path d="M400 300 C460 240 520 260 580 240 C640 220 700 260 760 240 C820 220 860 260 880 280" stroke="url(#accent)" stroke-width="3" fill="none" filter="url(#shadow)"/>
+  </g>
+  <!-- device mock -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="140" rx="18" ry="18" width="420" height="260" fill="#0f1526" stroke="url(#accent)" stroke-opacity="0.6"/>
+    <rect x="140" y="170" rx="12" ry="12" width="380" height="60" fill="#151b2e"/>
+    <rect x="140" y="240" rx="12" ry="12" width="180" height="140" fill="#151b2e"/>
+    <rect x="340" y="240" rx="12" ry="12" width="180" height="140" fill="#151b2e"/>
+    <rect x="160" y="188" width="160" height="24" rx="8" fill="url(#accent)" opacity="0.8"/>
+  </g>
+</svg>
+
+
+

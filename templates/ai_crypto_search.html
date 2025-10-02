@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crypto Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 20px 25px;
+            border: none;
+            font-size: 1.2rem;
+            background: #f8f9fa;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            background: white;
+        }
+        
+        .search-box button {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .search-box button:hover {
+            transform: scale(1.05);
+        }
+        
+        .results-container {
+            min-height: 300px;
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s;
+        }
+        
+        .result-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .result-title a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .result-title a:hover {
+            text-decoration: underline;
+        }
+        
+        .result-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .result-description {
+            color: #555;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-results h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+        
+        <div class="header">
+            <h1>🔍 AI Crypto Search</h1>
+            <p>Search for AI crypto projects and videos</p>
+        </div>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search for AI crypto projects, tokens, or topics..." />
+                <button id="searchBtn">🔍 Search</button>
+            </div>
+            
+            <div class="results-container" id="resultsContainer">
+                <div class="loading" id="loadingState" style="display: none;">
+                    🔍 Searching...
+                </div>
+                <div class="no-results" id="noResults" style="display: none;">
+                    <h3>No results found</h3>
+                    <p>Try searching for different terms.</p>
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', performSearch);
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('noResults').style.display = 'none';
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.status === 'error') {
+                    throw new Error(data.message);
+                }
+                
+                displayResults(data.results);
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                document.getElementById('searchResults').innerHTML = `
+                    <div class="result-item">
+                        <div class="result-title">Search Error</div>
+                        <div class="result-description">Failed to search: ${error.message}</div>
+                    </div>
+                `;
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+        
+        function displayResults(results) {
+            const container = document.getElementById('searchResults');
+            const noResults = document.getElementById('noResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            container.innerHTML = results.map(result => {
+                let link = '#';
+                let linkText = result.title;
+                
+                if (result.type === 'video') {
+                    link = result.video_url;
+                    linkText = `📺 ${result.title}`;
+                } else if (result.type === 'news') {
+                    link = result.url;
+                    linkText = `📰 ${result.title}`;
+                } else if (result.type === 'project') {
+                    link = `#${result.symbol}`;
+                    linkText = `💰 ${result.title}`;
+                }
+                
+                return `
+                    <div class="result-item">
+                        <div class="result-title">
+                            <a href="${link}" target="_blank">${linkText}</a>
+                        </div>
+                        <div class="result-meta">
+                            ${result.type.toUpperCase()} • ${result.relevance} relevance
+                        </div>
+                        <div class="result-description">
+                            ${result.description || 'No description available.'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

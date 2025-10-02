@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crypto Dashboard - Full View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .video-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .video-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .video-thumbnail {
+            flex-shrink: 0;
+            width: 120px;
+            height: 90px;
+        }
+        
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .video-info {
+            flex: 1;
+        }
+        
+        .video-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .video-title a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .video-title a:hover {
+            text-decoration: underline;
+        }
+        
+        .video-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .video-description {
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.4;
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .tier-tier-1 { background: #d4edda; color: #155724; }
+        .tier-tier-2 { background: #fff3cd; color: #856404; }
+        .tier-tier-3 { background: #f8d7da; color: #721c24; }
+        
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .project-list {
+            margin-top: 15px;
+        }
+        
+        .project-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .project-rank {
+            width: 30px;
+            height: 30px;
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .project-info {
+            flex: 1;
+        }
+        
+        .project-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .project-price {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .project-change {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        
+        .project-change.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .topic-list {
+            margin-top: 15px;
+        }
+        
+        .topic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .topic-tag {
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .topic-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Main Search</a>
+        
+        <div class="header">
+            <h1>📊 AI Crypto Dashboard</h1>
+            <p>Complete overview of AI cryptocurrency projects and market data</p>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>📺 Latest AI Crypto YouTube Videos</h2>
+                <div id="recentVideos">
+                    <div class="loading">Loading latest AI crypto videos...</div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>📊 AI Crypto Market Overview</h2>
+                <div id="marketOverview">
+                    <div class="market-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Total AI Crypto Projects</div>
+                            <div class="stat-value">10</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Market Cap</div>
+                            <div class="stat-value">$15.2B</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">24h Volume</div>
+                            <div class="stat-value">$2.1B</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>🏆 Top AI Crypto Projects</h2>
+                <div id="topProjects">
+                    <div class="project-list">
+                        <div class="project-item">
+                            <div class="project-rank">1</div>
+                            <div class="project-info">
+                                <div class="project-name">Bittensor (TAO)</div>
+                                <div class="project-price">$400.06</div>
+                            </div>
+                            <div class="project-change positive">+38.61%</div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-rank">2</div>
+                            <div class="project-info">
+                                <div class="project-name">NEAR Protocol (NEAR)</div>
+                                <div class="project-price">$2.16</div>
+                            </div>
+                            <div class="project-change positive">+3.10%</div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-rank">3</div>
+                            <div class="project-info">
+                                <div class="project-name">Story Protocol (IP)</div>
+                                <div class="project-price">$5.40</div>
+                            </div>
+                            <div class="project-change positive">+1.41%</div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-rank">4</div>
+                            <div class="project-info">
+                                <div class="project-name">Internet Computer (ICP)</div>
+                                <div class="project-price">$3.02</div>
+                            </div>
+                            <div class="project-change positive">+2.20%</div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-rank">5</div>
+                            <div class="project-info">
+                                <div class="project-name">Render (RENDER)</div>
+                                <div class="project-price">$2.45</div>
+                            </div>
+                            <div class="project-change positive">+5.77%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>📈 Trending AI Crypto Topics</h2>
+                <div id="trendingTopics">
+                    <div class="topic-list">
+                        <div class="topic-item">
+                            <span class="topic-tag">#Bittensor</span>
+                            <span class="topic-count">1.2K mentions</span>
+                        </div>
+                        <div class="topic-item">
+                            <span class="topic-tag">#AITraining</span>
+                            <span class="topic-count">856 mentions</span>
+                        </div>
+                        <div class="topic-item">
+                            <span class="topic-tag">#NEARProtocol</span>
+                            <span class="topic-count">743 mentions</span>
+                        </div>
+                        <div class="topic-item">
+                            <span class="topic-tag">#RenderNetwork</span>
+                            <span class="topic-count">621 mentions</span>
+                        </div>
+                        <div class="topic-item">
+                            <span class="topic-tag">#AICrypto</span>
+                            <span class="topic-count">2.1K mentions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/dashboard');
+                const data = await response.json();
+                
+                if (data.recent_videos) {
+                    updateRecentVideos(data.recent_videos);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+        
+        function updateRecentVideos(videos) {
+            const container = document.getElementById('recentVideos');
+            if (!videos || videos.length === 0) {
+                container.innerHTML = '<div class="loading">No videos available</div>';
+                return;
+            }
+            
+            container.innerHTML = videos.map(video => `
+                <div class="video-item">
+                    <div class="video-thumbnail">
+                        <a href="${video.video_url}" target="_blank">
+                            <img src="${video.thumbnail || 'https://img.youtube.com/vi/' + video.video_id + '/mqdefault.jpg'}" 
+                                 alt="${video.title}" 
+                                 onerror="this.src='https://img.youtube.com/vi/${video.video_id}/mqdefault.jpg'">
+                        </a>
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">
+                            <a href="${video.video_url}" target="_blank" class="video-link">${video.title}</a>
+                            <span class="tier-badge tier-${video.tier.toLowerCase().replace(' ', '-')}">${video.tier}</span>
+                        </div>
+                        <div class="video-meta">
+                            📺 ${video.channel} • ⏰ ${video.time_ago}
+                        </div>
+                        ${video.description ? `<div class="video-description">${video.description}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Load data on page load
+        loadDashboardData();
+        
+        // Auto-refresh every 5 minutes
+        setInterval(loadDashboardData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
