@@ -1,0 +1,60 @@
+ YouTube Agent Roma - Configuration File
+
+# Application settings
+app:
+  name: "YouTube Agent Roma"
+  version: "1.0.0"
+  description: "AI-powered YouTube content analysis and processing agent"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "detailed"
+  file: "logs/agent.log"
+
+# YouTube API configuration
+youtube:
+  api_key: "${YOUTUBE_API_KEY}"  # Set via environment variable
+  max_results: 50
+  default_region: "US"
+  default_language: "en"
+
+# Agent nodes configuration
+nodes:
+  search:
+    enabled: true
+    timeout: 30
+    retry_attempts: 3
+    cache_duration: 3600  # 1 hour in seconds
+    
+  analyze:
+    enabled: true
+    timeout: 60
+    max_content_length: 10000
+    supported_formats: ["video", "playlist", "channel"]
+    
+  process:
+    enabled: true
+    batch_size: 10
+    parallel_workers: 4
+    output_format: "json"
+
+# Data processing settings
+data:
+  input_formats: ["json", "csv", "yaml"]
+  output_formats: ["json", "csv", "yaml", "html"]
+  temp_directory: "temp/"
+  cache_directory: "cache/"
+
+# Security settings
+security:
+  rate_limit: 100  # requests per minute
+  max_file_size: "10MB"
+  allowed_domains: ["youtube.com", "youtu.be"]
+
+# Development settings
+development:
+  debug: false
+  verbose: false
+  mock_api: false
+
